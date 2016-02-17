@@ -1,6 +1,12 @@
 // import the node postres wrapper
 var pg = require('pg');
 
+/************************************************
+ * An example connection string.
+ 
+ * CHANGE THIS OR IT WON'T WORK ON YOUR MACHINE.
+ 
+ ************************************************/
 var conString = "postgres://aaron:1234@localhost/playground";
 
 var query = function(queryStr, cb){
