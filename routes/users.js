@@ -1,9 +1,16 @@
 var express = require('express');
 var router = express.Router();
+var db = require('../lib/db.js');
 
-// TODO GET users listing
+// GET users listing
 router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+  db.query('SELECT * FROM users', function(err, result){
+    if(err) {
+      next(err); //TODO this is most likely wrong
+    } else {
+      res.send(result.rows);
+    }
+  });
 });
 
 // TODO GET specific user
