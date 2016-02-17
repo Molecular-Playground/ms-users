@@ -6,6 +6,12 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var db = require('./db.js');
+db.connect('SELECT * FROM users', function(err, result){
+  if(err) console.error(err);
+  // print the first row in the table
+  console.log(result.rows[0]);
+});
 
 var app = express();
 
