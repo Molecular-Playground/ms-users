@@ -3,12 +3,12 @@ var pg = require('pg');
 
 var conString = "postgres://aaron:1234@localhost/playground";
 
-var connect = function(query, cb){
+var query = function(queryStr, cb){
   pg.connect(conString, function(err, client, done) {
     if(err) {
       return console.error('error fetching client from pool', err);
     }
-    client.query(query, function(err, result) {
+    client.query(queryStr, function(err, result) {
       done(); // release client back to pool
 
       if(err) {
@@ -21,5 +21,5 @@ var connect = function(query, cb){
 };
 
 module.exports = {
-  connect: connect
+  query: query
 };
