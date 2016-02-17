@@ -6,6 +6,22 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var db = require('./db.js');
+
+/*******************************
+* Since we imported db.js, we can now 
+* use its exported functionality.
+*
+* This is an example of a query.
+* Assuming a table of users exists
+* and db.js has a proper connection
+* string, it will print the first row.
+********************************/
+db.query('SELECT * FROM users', function(err, result){
+  if(err) console.error(err);
+  // print the first row in the table
+  console.log(result.rows[0]);
+});
 
 var app = express();
 
