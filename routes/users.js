@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var db = require('../lib/db.js');
+var bcrypt = require('bcrypt-nodejs');
 
 // GET users listing
 router.get('/', function(req, res, next) {
@@ -19,12 +20,36 @@ router.get('/:username', function(req, res, next) {
 });
 
 // TODO create user
-router.put('/:username', function(req, res, next) {
-  var username =  req.params.username;
-  var email =     req.query.email;
-  var password =  req.query.password; //TODO hash password
-  var location =  req.query.location;
-  res.send('respond with a resource');
+router.put('/', function(req, res, next) {
+  // todo: create validation url here
+  var validationURL = 'url';
+  var username =  req.body.username;
+  var email =     req.body.email;
+  var location =  req.body.location ? req.query.location : null;
+  var password = req.body.password;
+  if(validationURL && username && email && password){
+    bcrypt.hash(req.query.password, null, null, function(err, hash){
+      var qString = 'INSERT INTO users (username, email, password, validation_url, location) VALUES ($1, $2, $3, $4, $5)';
+      db.query({text: qString, values: [username, email, hash, validationURL, location]}, function(err, success){
+        if(err) {
+          res.send("Couldn't create user");
+          console.log(err);
+        }
+        else {
+          // todo: send email
+          res.send('User created!');
+        }
+      });
+    });
+  }
+  else {
+    console.log(req);
+    console.log("wtf");
+    console.log(password);
+    console.log(email);
+    console.log(location);
+    res.send("Didn't recieve required information"); 
+  }
 });
 
 // TODO update user
