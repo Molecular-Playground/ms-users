@@ -33,7 +33,6 @@ router.put('/', function(req, res, next) {
       db.query({text: qString, values: [username, email, hash, validationURL, location]}, function(err, success){
         if(err) {
           res.send("Couldn't create user");
-          console.log(err);
         }
         else {
           // todo: send email
@@ -43,11 +42,6 @@ router.put('/', function(req, res, next) {
     });
   }
   else {
-    console.log(req);
-    console.log("wtf");
-    console.log(password);
-    console.log(email);
-    console.log(location);
     res.send("Didn't recieve required information"); 
   }
 });
