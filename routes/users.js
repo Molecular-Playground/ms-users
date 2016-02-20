@@ -27,19 +27,24 @@ router.put('/', function(req, res, next) {
   var email =     req.body.email;
   var location =  req.body.location ? req.query.location : null;
   var password = req.body.password;
+  var salt = bcrypt.genSaltSync(10)
   if(validationURL && username && email && password){
-    bcrypt.hash(req.query.password, null, null, function(err, hash){
-      var qString = 'INSERT INTO users (username, email, password, validation_url, location) VALUES ($1, $2, $3, $4, $5)';
-      db.query({text: qString, values: [username, email, hash, validationURL, location]}, function(err, success){
-        if(err) {
-          res.send("Couldn't create user");
-        }
-        else {
-          // todo: send email
-          res.send('User created!');
-        }
+    bcrypt.genSalt(10, function(err, salt){
+      bcrypt.hash(password, salt, null, function(err, hash){
+        console.log(hash);
+        var qString = 'INSERT INTO users (username, email, password, validation_url, location) VALUES ($1, $2, $3, $4, $5)';
+        db.query({text: qString, values: [username, email, hash, validationURL, location]}, function(err, success){
+          if(err) {
+            res.send(err.detail);
+          }
+          else {
+            // todo: send email
+            res.send('User created!');
+          }
+        });
       });
     });
+
   }
   else {
     res.send("Didn't recieve required information"); 
