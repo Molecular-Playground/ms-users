@@ -21,8 +21,11 @@ router.get('/:username', function(req, res, next) {
 
 // TODO create user
 router.put('/', function(req, res, next) {
-  // todo: create validation url here
-  var validationURL = 'url';
+  // http://stackoverflow.com/questions/10726909/random-alpha-numeric-string-in-javascript
+  function randomString(length) {
+    return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
+  }
+  var validationURL = randomString(30);
   var username =  req.body.username;
   var email =     req.body.email;
   var location =  req.body.location ? req.query.location : null;
