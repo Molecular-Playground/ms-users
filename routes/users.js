@@ -14,9 +14,17 @@ router.get('/', function(req, res, next) {
   });
 });
 
-// TODO GET specific user
+// GET specific user
 router.get('/:username', function(req, res, next) {
-  res.send('respond with a resource');
+  var qString = 'SELECT * FROM users WHERE username = $1'
+  var username = req.params.username;
+  db.query({text: qString, values: [username]}, function(err, result){
+    if(err) {
+      next(err); //TODO this is most likely wrong
+    } else {
+      res.send(result.rows);
+    }
+  });
 });
 
 // TODO create user
