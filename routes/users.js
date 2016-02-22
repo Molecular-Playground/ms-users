@@ -100,9 +100,18 @@ router.post('/:username', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-// TODO DELETE user
+// DELETE user TODO Admin only once we make admins.
 router.delete('/:username', function(req, res, next) {
-  res.send('respond with a resource');
+  var username = req.params.username;
+  var qString = 'DELETE FROM users WHERE username = $1';
+  db.query({text: qString, values: [username]}, function(err, success){
+    if(err) {
+      res.send(err.detail);
+    }
+    else {
+      res.send("Deleted " + username);
+    }
+  });
 });
 
 module.exports = router;
