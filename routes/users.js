@@ -115,11 +115,6 @@ router.patch('/validate', function(req, res, next){
   }
 });
 
-// TODO update user
-router.post('/:username', function(req, res, next) {
-  res.send('respond with a resource');
-});
-
 // DELETE user TODO Admin only once we make admins.
 router.delete('/:username', function(req, res, next) {
   var username = req.params.username;
