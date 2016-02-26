@@ -2,6 +2,9 @@ var express = require('express');
 var router = express.Router();
 var db = require('../lib/db.js');
 var bcrypt = require('bcrypt-nodejs');
+var request = require('request');
+var MS_EMAIL_URL = "http://msmail:3000";
+var MS_FRONTEND_URL = "http://msfrontend:3000";
 
 // GET users listing
 router.get('/', function(req, res, next) {
@@ -49,7 +52,24 @@ router.put('/', function(req, res, next) {
             res.send(err.detail);
           }
           else {
-            // todo: send email
+            var reqParams = {
+		            url: MS_EMAIL_URL + '/validate',
+		            method: 'PUT',
+		            json: true,
+		            body: {
+                  email: email,
+                  link: MS_FRONTEND_URL + "/validate?email=" + email + "&key=" + validationURL
+                }
+	          };
+            request(reqParams, function (error, response, body) {
+          		if (!error && response.statusCode == 200) {
+          			res.send(body);
+          		}
+          		else {
+          			res.send(body);
+          		}
+          	});
+
             res.send('User created!');
           }
         });
@@ -62,7 +82,7 @@ router.put('/', function(req, res, next) {
   }
 });
 
-// validate user: Uses the query string, because it will be given in an email as a full URL. TODO Should be a GET request, but I left it as a PATCH request for now to avoid conflicting with other routes.
+// validate user
 router.patch('/validate', function(req, res, next){
   var email = req.body.email;
   var key = req.body.key;
