@@ -3,6 +3,10 @@ var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var njwt = require('njwt');
+
+//TODO read from config file
+var signingKey = "PLACEHOLDER"
 
 var users = require('./routes/users');
 
@@ -12,6 +16,25 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+//validate JWTs here
+app.use(function(req,res,next) {
+  //TODO is headers correct location for token?
+  var token = req.headers.token;
+  if(token){
+    njwt.verify(token,signingKey,function(err,ver){
+      if(err){
+        req.expired = true;
+        next();
+      }else{
+        req.user = ver.body;
+        next();
+      }
+    });
+  } else{
+    next();
+  }
+});
 
 app.use('/', users);
 

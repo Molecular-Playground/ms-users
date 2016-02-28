@@ -115,6 +115,44 @@ router.patch('/validate', function(req, res, next){
   }
 });
 
+// edit user
+router.patch('/', function(req, res, next){
+  if(!req.user){
+    var message = req.expired?"Session expired":"Not logged in";
+    res.send({
+      success: false,
+      message: message
+    });
+  } else{
+    var username = req.body.username;
+    var location = req.body.location;
+    var id = req.user.sub;
+    if(username || location){
+      var qString;
+      if(username) qString = "UPDATE users SET username = $1 WHERE uid = $2";
+      else if(location) qString = "UPDATE users SET location = $1 WHERE uid = $2";
+      db.query({text:qString, values: [username||location,id]}, function(err,success){
+        if(err){
+          res.send({
+            success: false,
+            error: err,
+            message: "server error"
+          });
+        } else{
+          res.send({
+            success: true
+          });
+        }
+      });
+    } else{
+      res.send({
+        success: false,
+        message: "no update requested"
+      });
+    }
+  }
+});
+
 // DELETE user TODO Admin only once we make admins.
 router.delete('/:username', function(req, res, next) {
   var username = req.params.username;
