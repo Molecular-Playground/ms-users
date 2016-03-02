@@ -25,7 +25,7 @@ router.get('/:username', function(req, res, next) {
     if(err) {
       next(err); //TODO this is most likely wrong
     } else {
-      res.send(result.rows);
+      if(result.rows) res.send(result.rows[0]);
     }
   });
 });
