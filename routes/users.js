@@ -8,29 +8,32 @@ var MS_FRONTEND_URL = "http://msfrontend:3000";
 
 // GET users listing
 router.get('/', function(req, res, next) {
-  db.query('SELECT * FROM users', function(err, result){
+  db.query('SELECT username FROM users', function(err, result){
     if(err) {
-      next(err); //TODO this is most likely wrong
+      next(err);
     } else {
       res.send(result.rows);
     }
   });
 });
 
-// GET specific user
+// GET specific user NOTE will NOT EXIST in production. For testing purposes only.
 router.get('/:username', function(req, res, next) {
-  var qString = 'SELECT * FROM users WHERE username = $1'
+  var qString = 'SELECT * FROM users WHERE username = $1';
   var username = req.params.username;
   db.query({text: qString, values: [username]}, function(err, result){
     if(err) {
-      next(err); //TODO this is most likely wrong
+      next(err);
     } else {
       if(result.rows) res.send(result.rows[0]);
+      else res.send({
+        message: 'user not found'
+      });
     }
   });
 });
 
-// TODO create user
+//create user
 router.put('/', function(req, res, next) {
   // http://stackoverflow.com/questions/10726909/random-alpha-numeric-string-in-javascript
   function randomString(length) {
@@ -41,7 +44,7 @@ router.put('/', function(req, res, next) {
   var email =     req.body.email;
   var location =  req.body.location ? req.query.location : null;
   var password = req.body.password;
-  var salt = bcrypt.genSaltSync(10)
+  var salt = bcrypt.genSaltSync(10);
   if(validationURL && username && email && password){
     bcrypt.genSalt(10, function(err, salt){
       bcrypt.hash(password, salt, null, function(err, hash){
@@ -49,7 +52,11 @@ router.put('/', function(req, res, next) {
         var qString = 'INSERT INTO users (username, email, password, validation_url, location) VALUES ($1, $2, $3, $4, $5)';
         db.query({text: qString, values: [username, email, hash, validationURL, location]}, function(err, success){
           if(err) {
-            res.send(err.detail);
+            res.send({
+              success: false,
+              message: "Database error",
+              error: err
+            });
           }
           else {
             var reqParams = {
@@ -63,10 +70,15 @@ router.put('/', function(req, res, next) {
 	          };
             request(reqParams, function (error, response, body) {
           		if (!error && response.statusCode == 200) {
-          			res.send(body);
+          			res.send({
+                  success: true
+                });
           		}
           		else {
-          			res.send(body);
+                res.send({
+                  success: false,
+                  message: "email may not have been sent"
+                });
           		}
           	});
           }
@@ -76,7 +88,10 @@ router.put('/', function(req, res, next) {
 
   }
   else {
-    res.send("Didn't recieve required information");
+    res.send({
+      success: false,
+      message: "Didn't recieve required information"
+    });
   }
 });
 
@@ -88,81 +103,46 @@ router.post('/validate', function(req, res, next){
     var qString = 'SELECT validation_url FROM users WHERE email = $1';
     db.query({text: qString, values: [email]}, function(err, results){
       if(err) {
-        res.send(err.detail);
+        res.send({
+          success: false,
+          message: "Database error",
+          error: err
+        });
       }
       else {
         if(results.rows[0] && (key === results.rows[0].validation_url)){
           var qString2 = 'UPDATE users SET validated=TRUE WHERE email = $1';
           db.query({text: qString2, values: [email]}, function(err, success){
             if(err) {
-              res.send(err.detail);
+              res.send({
+                success: false,
+                message: "Database error",
+                error: err
+              });
             }
             else {
-              res.send("Validated " + email);
+              res.send({
+                success: true,
+                message: "Validated " + email
+              });
             }
           });
         }
         else { //if(results.rows[0] && (key === results.rows[0].validation_url))
-          res.send("Invalid URL.");
+          res.send({
+            success: false,
+            message: "Invalid url"
+          });
         }
       }
     });
   }
   else { //if(email && key)
-    res.send("email or key not specified.");
-  }
-});
-
-// edit user
-router.post('/', function(req, res, next){
-  if(!req.user){
-    var message = req.expired?"Session expired":"Not logged in";
     res.send({
       success: false,
-      message: message
+      message: "Email or key not specified in body"
     });
-  } else{
-    var username = req.body.username;
-    var location = req.body.location;
-    var id = req.user.sub;
-    if(username || location){
-      var qString;
-      if(username) qString = "UPDATE users SET username = $1 WHERE uid = $2";
-      else if(location) qString = "UPDATE users SET location = $1 WHERE uid = $2";
-      db.query({text:qString, values: [username||location,id]}, function(err,success){
-        if(err){
-          res.send({
-            success: false,
-            error: err,
-            message: "server error"
-          });
-        } else{
-          res.send({
-            success: true
-          });
-        }
-      });
-    } else{
-      res.send({
-        success: false,
-        message: "no update requested"
-      });
-    }
   }
-});
-
-// DELETE user TODO Admin only once we make admins.
-router.delete('/:username', function(req, res, next) {
-  var username = req.params.username;
-  var qString = 'DELETE FROM users WHERE username = $1';
-  db.query({text: qString, values: [username]}, function(err, success){
-    if(err) {
-      res.send(err.detail);
-    }
-    else {
-      res.send("Deleted " + username);
-    }
-  });
 });
 
 module.exports = router;

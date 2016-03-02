@@ -6,7 +6,7 @@ var bodyParser = require('body-parser');
 var njwt = require('njwt');
 
 //TODO read from config file
-var signingKey = "PLACEHOLDER"
+var signingKey = "PLACEHOLDER";
 
 var users = require('./routes/users');
 
