@@ -69,8 +69,6 @@ router.put('/', function(req, res, next) {
           			res.send(body);
           		}
           	});
-
-            res.send('User created!');
           }
         });
       });
