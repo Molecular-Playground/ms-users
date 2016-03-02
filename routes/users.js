@@ -3,7 +3,7 @@ var router = express.Router();
 var db = require('../lib/db.js');
 var bcrypt = require('bcrypt-nodejs');
 var request = require('request');
-var MS_EMAIL_URL = "http://msmail:3000";
+var MS_EMAIL_URL = "http://msemail:3000";
 var MS_FRONTEND_URL = "http://msfrontend:3000";
 
 // GET users listing
