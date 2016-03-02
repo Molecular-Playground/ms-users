@@ -83,7 +83,7 @@ router.put('/', function(req, res, next) {
 });
 
 // validate user
-router.patch('/validate', function(req, res, next){
+router.post('/validate', function(req, res, next){
   var email = req.body.email;
   var key = req.body.key;
   if(email && key){
@@ -116,7 +116,7 @@ router.patch('/validate', function(req, res, next){
 });
 
 // edit user
-router.patch('/', function(req, res, next){
+router.post('/', function(req, res, next){
   if(!req.user){
     var message = req.expired?"Session expired":"Not logged in";
     res.send({
