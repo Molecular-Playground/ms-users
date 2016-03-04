@@ -27,7 +27,7 @@ docker restart -t=0 users
 The easiest way to develop using the docker container is to mount your working directory as a volume. Before we begin, you will still need to make sure you have both the [database](https://github.com/Molecular-Playground/databaes) and the [ms-email](https://github.com/Molecular-Playground/databaes) microservice running in containers. From inside docker virtual machine, navigate to the top directory of this repository. Enter the following commands:
 ```
 docker build -t users .
-docker run -i -t -p 3000:3000 --link postgres:postgres --link email:email -v $PWD:/src users apk add --update bash && bash
+docker run -i -t -p 3000:3000 --link postgres:postgres --link email:email -v $PWD:/src users /bin/sh
 # where the names of the microservice containers are on the left side of the :
 # where $PWD is a variable to your current directory and may need changing if you are using a windows environment
 ```
