@@ -10,7 +10,11 @@ var MS_FRONTEND_URL = "http://msfrontend:3000";
 router.get('/', function(req, res, next) {
   db.query('SELECT username FROM users', function(err, result){
     if(err) {
-      next(err);
+      res.send({
+        success: false,
+        message: "Database error",
+        error: err
+      });
     } else {
       res.send(result.rows);
     }
@@ -23,10 +27,15 @@ router.get('/:username', function(req, res, next) {
   var username = req.params.username;
   db.query({text: qString, values: [username]}, function(err, result){
     if(err) {
-      next(err);
+      res.send({
+        success: false,
+        message: "Database error",
+        error: err
+      });
     } else {
       if(result.rows) res.send(result.rows[0]);
       else res.send({
+        success: false,
         message: 'user not found'
       });
     }
