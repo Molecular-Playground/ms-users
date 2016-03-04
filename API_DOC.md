@@ -35,7 +35,20 @@ Params (must be Body parameters in raw JSON format):
 Location is optional. This is an unauthenticated endpoint.
 
 ### #POST
+Updates a user object.
 
+Params: 
+
+      {
+        "username": "user_name",
+        "location": "some_location"
+      }
+      
+Both of these parameters are optional..?
+  
+This is an authenticated endpoint.
+
+Returns "Success" OR `some_probably_nondescriptive_error`
 # /:username
 Where `:username` is replaced by (you guessed it!) a username that exists in the database.
 
