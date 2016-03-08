@@ -8,6 +8,7 @@ var njwt = require('njwt');
 //TODO read from config file
 var signingKey = "PLACEHOLDER";
 
+var ms_users_auth = require('./routes/ms-users-auth');
 var ms_users_public = require('./routes/ms-users-public');
 
 var app = express();
@@ -17,6 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+app.use('/', ms_users_auth);
 app.use('/', ms_users_public);
 
 // catch 404 and forward to error handler
