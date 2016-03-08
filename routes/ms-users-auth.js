@@ -33,13 +33,6 @@ router.post('/', auth, function(req, res, next){
 
 // DELETE user TODO Admin only once we make admins.
 router.delete('/:username', auth, function(req, res, next) {
-  if(!req.user.admin){
-    res.send({
-      success:false,
-      message:'Must be an admin to delete users'
-    });
-    return;
-  }
   var username = req.params.username;
   var qString = 'DELETE FROM users WHERE username = $1';
   db.query({text: qString, values: [username]}, function(err, success){
