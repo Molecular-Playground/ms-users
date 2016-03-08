@@ -31,7 +31,8 @@ router.post('/', auth, function(req, res, next){
   }
 });
 
-// DELETE user TODO Admin only once we make admins.
+// delete user
+// TODO Admin only once we make admins (or explore other options)
 router.delete('/:username', auth, function(req, res, next) {
   var username = req.params.username;
   var qString = 'DELETE FROM users WHERE username = $1';

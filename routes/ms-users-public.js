@@ -6,7 +6,7 @@ var request = require('request');
 var MS_EMAIL_URL = "http://msemail:3000";
 var MS_FRONTEND_URL = "http://msfrontend:3000";
 
-// GET users listing
+// get users listing
 router.get('/', function(req, res, next) {
   db.query('SELECT username FROM users', function(err, result){
     if(err) {
@@ -21,7 +21,7 @@ router.get('/', function(req, res, next) {
   });
 });
 
-// GET specific user NOTE will NOT EXIST in production. For testing purposes only.
+// get specific user
 router.get('/:username', function(req, res, next) {
   var qString = 'SELECT * FROM users WHERE username = $1';
   var username = req.params.username;
@@ -42,7 +42,7 @@ router.get('/:username', function(req, res, next) {
   });
 });
 
-//create user
+// create user
 router.put('/', function(req, res, next) {
   // http://stackoverflow.com/questions/10726909/random-alpha-numeric-string-in-javascript
   function randomString(length) {
