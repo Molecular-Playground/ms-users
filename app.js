@@ -3,10 +3,6 @@ var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var njwt = require('njwt');
-
-//TODO read from config file
-var signingKey = "PLACEHOLDER";
 
 var ms_users_auth = require('./routes/ms-users-auth');
 var ms_users_public = require('./routes/ms-users-public');
