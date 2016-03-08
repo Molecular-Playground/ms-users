@@ -8,7 +8,7 @@ var njwt = require('njwt');
 //TODO read from config file
 var signingKey = "PLACEHOLDER";
 
-var users = require('./routes/users');
+var ms_users_public = require('./routes/ms-users-public');
 
 var app = express();
 
@@ -17,26 +17,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-//validate JWTs here
-app.use(function(req,res,next) {
-  //TODO is headers correct location for token?
-  var token = req.headers.token;
-  if(token){
-    njwt.verify(token,signingKey,function(err,ver){
-      if(err){
-        req.expired = true;
-        next();
-      }else{
-        req.user = ver.body;
-        next();
-      }
-    });
-  } else{
-    next();
-  }
-});
-
-app.use('/', users);
+app.use('/', ms_users_public);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
