@@ -10,14 +10,14 @@ router.post('/', auth, function(req, res, next){
   if(req.user.username || location){
     var qString = "UPDATE users SET location = $1 WHERE uid = $2";
     db.query({text:qString, values: [location,id]}, function(err,success){
-      if(err) {next(error);return;}
+      if(err) {next(err);return;}
       res.send({
         success: true,
         message: 'location updated'
       });
     });
   }
-  if(err) {next(error);return;}
+  if(err) {next(err);return;}
 });
 
 // delete user
@@ -26,7 +26,7 @@ router.delete('/:username', auth, function(req, res, next) {
   var username = req.params.username;
   var qString = 'DELETE FROM users WHERE username = $1';
   db.query({text: qString, values: [username]}, function(err, success){
-    if(err) {next(error);return;}
+    if(err) {next(err);return;}
     res.send({
       success: true,
       message: "Deleted " + username

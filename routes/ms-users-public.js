@@ -9,7 +9,7 @@ var MS_FRONTEND_URL = "http://msfrontend:3000";
 // get users listing
 router.get('/', function(req, res, next) {
   db.query('SELECT username FROM users', function(err, result){
-    if(err) {next(error);return;}
+    if(err) {next(err);return;}
     res.send(result.rows);
   });
 });
@@ -19,7 +19,7 @@ router.get('/:username', function(req, res, next) {
   var qString = 'SELECT * FROM users WHERE username = $1';
   var username = req.params.username;
   db.query({text: qString, values: [username]}, function(err, result){
-    if(err) {next(error);return;}
+    if(err) {next(err);return;}
     if(result.rows) res.send(result.rows[0]);
     else res.send({
       success: false,
@@ -46,7 +46,7 @@ router.put('/', function(req, res, next) {
         console.log(hash);
         var qString = 'INSERT INTO users (username, email, password, validation_url, location) VALUES ($1, $2, $3, $4, $5)';
         db.query({text: qString, values: [username, email, hash, validationURL, location]}, function(err, success){
-          if(err) {next(error);return;}
+          if(err) {next(err);return;}
           var reqParams = {
 	            url: MS_EMAIL_URL + '/validate',
 	            method: 'PUT',
@@ -78,7 +78,7 @@ router.post('/validate', function(req, res, next){
   if(email && key){
     var qString = 'SELECT validation_url FROM users WHERE email = $1';
     db.query({text: qString, values: [email]}, function(err, results){
-      if(err) {next(error);return;}
+      if(err) {next(err);return;}
       if(results.rows[0] && (key === results.rows[0].validation_url)){
         var qString2 = 'UPDATE users SET validated=TRUE WHERE email = $1';
         db.query({text: qString2, values: [email]}, function(err, success){
