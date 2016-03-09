@@ -7,7 +7,7 @@ var auth = require('../lib/auth.js');
 router.post('/', auth, function(req, res, next){
   var location = req.body.location;
   var id = req.user.sub;
-  if(username || location){
+  if(req.user.username || location){
     var qString = "UPDATE users SET location = $1 WHERE uid = $2";
     db.query({text:qString, values: [location,id]}, function(err,success){
       if(err){
