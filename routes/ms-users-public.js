@@ -9,15 +9,8 @@ var MS_FRONTEND_URL = "http://msfrontend:3000";
 // get users listing
 router.get('/', function(req, res, next) {
   db.query('SELECT username FROM users', function(err, result){
-    if(err) {
-      res.send({
-        success: false,
-        message: "Database error",
-        error: err
-      });
-    } else {
-      res.send(result.rows);
-    }
+    if(err) {next(error);return;}
+    res.send(result.rows);
   });
 });
 
@@ -26,19 +19,12 @@ router.get('/:username', function(req, res, next) {
   var qString = 'SELECT * FROM users WHERE username = $1';
   var username = req.params.username;
   db.query({text: qString, values: [username]}, function(err, result){
-    if(err) {
-      res.send({
-        success: false,
-        message: "Database error",
-        error: err
-      });
-    } else {
-      if(result.rows) res.send(result.rows[0]);
-      else res.send({
-        success: false,
-        message: 'user not found'
-      });
-    }
+    if(err) {next(error);return;}
+    if(result.rows) res.send(result.rows[0]);
+    else res.send({
+      success: false,
+      message: 'user not found'
+    });
   });
 });
 
@@ -60,48 +46,29 @@ router.put('/', function(req, res, next) {
         console.log(hash);
         var qString = 'INSERT INTO users (username, email, password, validation_url, location) VALUES ($1, $2, $3, $4, $5)';
         db.query({text: qString, values: [username, email, hash, validationURL, location]}, function(err, success){
-          if(err) {
-            res.send({
-              success: false,
-              message: "Database error",
-              error: err
+          if(err) {next(error);return;}
+          var reqParams = {
+	            url: MS_EMAIL_URL + '/validate',
+	            method: 'PUT',
+	            json: true,
+	            body: {
+                email: email,
+                link: MS_FRONTEND_URL + "/validate?email=" + email + "&key=" + validationURL
+              }
+          };
+          request(reqParams, function (error, response, body) {
+            if(error) {next(error);return;}
+      			res.send({
+              success: true
             });
-          }
-          else {
-            var reqParams = {
-		            url: MS_EMAIL_URL + '/validate',
-		            method: 'PUT',
-		            json: true,
-		            body: {
-                  email: email,
-                  link: MS_FRONTEND_URL + "/validate?email=" + email + "&key=" + validationURL
-                }
-	          };
-            request(reqParams, function (error, response, body) {
-          		if (!error && response.statusCode == 200) {
-          			res.send({
-                  success: true
-                });
-          		}
-          		else {
-                res.send({
-                  success: false,
-                  message: "email may not have been sent"
-                });
-          		}
-          	});
-          }
+        	});
         });
       });
     });
 
   }
-  else {
-    res.send({
-      success: false,
-      message: "Didn't recieve required information"
-    });
-  }
+  var err = new Error("Didn't recieve required information");
+  next(err);
 });
 
 // validate user
@@ -111,38 +78,29 @@ router.post('/validate', function(req, res, next){
   if(email && key){
     var qString = 'SELECT validation_url FROM users WHERE email = $1';
     db.query({text: qString, values: [email]}, function(err, results){
-      if(err) {
+      if(err) {next(error);return;}
+      if(results.rows[0] && (key === results.rows[0].validation_url)){
+        var qString2 = 'UPDATE users SET validated=TRUE WHERE email = $1';
+        db.query({text: qString2, values: [email]}, function(err, success){
+          if(err) {
+            res.send({
+              success: false,
+              message: "Database error",
+              error: err
+            });
+          }
+          else {
+            res.send({
+              success: true,
+              message: "Validated " + email
+            });
+          }
+        });
+      } else { //if(results.rows[0] && (key === results.rows[0].validation_url))
         res.send({
           success: false,
-          message: "Database error",
-          error: err
+          message: "Invalid url"
         });
-      }
-      else {
-        if(results.rows[0] && (key === results.rows[0].validation_url)){
-          var qString2 = 'UPDATE users SET validated=TRUE WHERE email = $1';
-          db.query({text: qString2, values: [email]}, function(err, success){
-            if(err) {
-              res.send({
-                success: false,
-                message: "Database error",
-                error: err
-              });
-            }
-            else {
-              res.send({
-                success: true,
-                message: "Validated " + email
-              });
-            }
-          });
-        }
-        else { //if(results.rows[0] && (key === results.rows[0].validation_url))
-          res.send({
-            success: false,
-            message: "Invalid url"
-          });
-        }
       }
     });
   }
