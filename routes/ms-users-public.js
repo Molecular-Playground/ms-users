@@ -65,10 +65,10 @@ router.put('/', function(req, res, next) {
         });
       });
     });
-
+  } else {
+    var err = new Error("Didn't recieve required information");
+    next(err);
   }
-  var err = new Error("Didn't recieve required information");
-  next(err);
 });
 
 // validate user
