@@ -37,13 +37,12 @@ router.put('/', function(req, res, next) {
   var validationURL = randomString(30);
   var username =  req.body.username;
   var email =     req.body.email;
-  var location =  req.body.location ? req.query.location : null;
+  var location =  req.body.location
   var password = req.body.password;
   var salt = bcrypt.genSaltSync(10);
   if(validationURL && username && email && password){
     bcrypt.genSalt(10, function(err, salt){
       bcrypt.hash(password, salt, null, function(err, hash){
-        console.log(hash);
         var qString = 'INSERT INTO users (username, email, password, validation_url, location) VALUES ($1, $2, $3, $4, $5)';
         db.query({text: qString, values: [username, email, hash, validationURL, location]}, function(err, success){
           if(err) {next(err);return;}
@@ -71,7 +70,9 @@ router.put('/', function(req, res, next) {
   }
 });
 
-// validate user
+// Validate a user. Takes a username and a url (aka 'key')
+// that was emailed during the creation process and
+// updates the 'validated' column in the user's db object.
 router.post('/validate', function(req, res, next){
   var email = req.body.email;
   var key = req.body.key;
