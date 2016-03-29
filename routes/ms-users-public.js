@@ -21,10 +21,11 @@ router.get('/:username', function(req, res, next) {
   db.query({text: qString, values: [username]}, function(err, result){
     if(err) {next(err);return;}
     if(result.rows) res.send(result.rows[0]);
-    else res.send({
-      success: false,
-      message: 'user not found'
-    });
+    else{
+      var err = new Error("User not found");
+      err.status = 400;
+      next(err);
+    }
   });
 });
 
@@ -66,6 +67,7 @@ router.put('/', function(req, res, next) {
     });
   } else {
     var err = new Error("Didn't recieve required information");
+    err.status = 400;
     next(err);
   }
 });
@@ -84,11 +86,8 @@ router.post('/validate', function(req, res, next){
         var qString2 = 'UPDATE users SET validated=TRUE WHERE email = $1';
         db.query({text: qString2, values: [email]}, function(err, success){
           if(err) {
-            res.send({
-              success: false,
-              message: "Database error",
-              error: err
-            });
+            next(err);
+            return;
           }
           else {
             res.send({
@@ -98,18 +97,18 @@ router.post('/validate', function(req, res, next){
           }
         });
       } else { //if(results.rows[0] && (key === results.rows[0].validation_url))
-        res.send({
-          success: false,
-          message: "Invalid url"
-        });
+        var err = new Error("Invalid validation token");
+        err.status = 400;
+        next(err);
+        return;
       }
     });
   }
   else { //if(email && key)
-    res.send({
-      success: false,
-      message: "Email or key not specified in body"
-    });
+    var err = new Error("Did not recieve required information");
+    err.status = 400;
+    next(err);
+    return;
   }
 });
 

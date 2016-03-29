@@ -17,7 +17,11 @@ router.post('/', auth, function(req, res, next){
       });
     });
   }
-  if(err) {next(err);return;}
+  else{
+    var err = new Error("Username or location not provided");
+    err.status = 400;
+    next(err);
+  }
 });
 
 // delete user
