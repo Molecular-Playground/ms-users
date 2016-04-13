@@ -116,9 +116,10 @@ router.post('/send-reset-email', function(req, res, next){
   if (email) {
     var txtBody = "A password reset for your Molecular Playground account has been requested.\nPlease follow the link to reset your password: \n";
     var htmlBody = "<p>A password reset for your Molecular Playground account has been requested.</p><p>Please follow the link to reset your password: </p>"
-    var link = MS_FRONTEND_URL + "/validate?email=" + email + "&key=" + randomString(30);
+    var key = randomString(30);
+    var link = MS_FRONTEND_URL + "/password-reset?email=" + email + "&key=" + key;
     var qString2 = 'UPDATE users SET password_reset_key=$1 WHERE email = $2';
-    db.query({text: qString2, values: [link, email]}, function(err, success){
+    db.query({text: qString2, values: [key, email]}, function(err, success){
       if(err) {
         next(err);
         return;
