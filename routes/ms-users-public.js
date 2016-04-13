@@ -6,14 +6,6 @@ var request = require('request');
 var MS_EMAIL_URL = "http://msemail:3000";
 var MS_FRONTEND_URL = "http://msfrontend:3000";
 
-// get users listing
-router.get('/', function(req, res, next) {
-  db.query('SELECT username FROM users', function(err, result){
-    if(err) {next(err);return;}
-    res.send(result.rows);
-  });
-});
-
 // get specific user
 router.get('/:username', function(req, res, next) {
   var qString = 'SELECT * FROM users WHERE username = $1';
