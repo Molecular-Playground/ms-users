@@ -28,13 +28,12 @@ router.get('/:username', function(req, res, next) {
     }
   });
 });
-
+// http://stackoverflow.com/questions/10726909/random-alpha-numeric-string-in-javascript
+function randomString(length) {
+  return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
+}
 // create user
 router.put('/', function(req, res, next) {
-  // http://stackoverflow.com/questions/10726909/random-alpha-numeric-string-in-javascript
-  function randomString(length) {
-    return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
-  }
   var validationURL = randomString(30);
   var username =  req.body.username;
   var email =     req.body.email;
@@ -112,4 +111,39 @@ router.post('/validate', function(req, res, next){
   }
 });
 
+router.post('/send-reset-email', function(req, res, next){
+  var email = req.body.email;
+  if (email) {
+    var txtBody = "A password reset for your Molecular Playground account has been requested.\nPlease follow the link to reset your password: \n";
+    var htmlBody = "<p>A password reset for your Molecular Playground account has been requested.</p><p>Please follow the link to reset your password: </p>"
+    var link = MS_FRONTEND_URL + "/validate?email=" + email + "&key=" + randomString(30);
+    var qString2 = 'UPDATE users SET password_reset_key=$1 WHERE email = $2';
+    db.query({text: qString2, values: [link, email]}, function(err, success){
+      if(err) {
+        next(err);
+        return;
+      }
+      else {
+        var reqParams = {
+            url: MS_EMAIL_URL + '/general',
+            method: 'PUT',
+            json: true,
+            body: {
+              email: email,
+              subject: "Reset your Molecular Playground password",
+              text: txtBody + link,
+              html: htmlBody + link
+            }
+        };
+        request(reqParams, function (error, response, body) {
+          if(error) {next(error);return;}
+          res.send({
+            success: true,
+            message: 'Sent password reset email.'
+          });
+        });
+      }
+    });
+  }
+}
 module.exports = router;
