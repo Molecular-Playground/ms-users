@@ -4,7 +4,7 @@ var db = require('../lib/db.js');
 var bcrypt = require('bcrypt-nodejs');
 var request = require('request');
 var MS_EMAIL_URL = "http://msemail:3000";
-var MS_FRONTEND_URL = "http://msfrontend:3000";
+var MS_FRONTEND_URL = "http://104.236.54.250";
 
 // get specific user
 router.get('/:username', function(req, res, next) {
