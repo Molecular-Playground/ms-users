@@ -118,7 +118,7 @@ router.post('/send-reset-email', function(req, res, next){
     var htmlBody = "<p>A password reset for your Molecular Playground account has been requested.</p><p>Please follow the link to reset your password: </p>"
     var key = randomString(30);
     var link = MS_FRONTEND_URL + "/password-reset?email=" + email + "&key=" + key;
-    var qString2 = 'UPDATE users SET password_reset_key=$1 WHERE email = $2';
+    var qString2 = 'UPDATE users SET password_reset_key=$1 WHERE email=$2';
     db.query({text: qString2, values: [key, email]}, function(err, success){
       if(err) {
         next(err);
@@ -146,5 +146,45 @@ router.post('/send-reset-email', function(req, res, next){
       }
     });
   }
-}
+  else {
+    var err = new Error("Didn't recieve required information");
+    err.status = 400;
+    next(err);
+  }
+});
+router.post('/reset-password', function(req, res, next) {
+  var key = req.body.key;
+  var email = req.body.email;
+  var password = req.body.password;
+  if (key && email && password) {
+    var query = "SELECT password_reset_key FROM users WHERE EMAIL=$1"
+    db.query({text: query, values: [email]}, function(err, results){
+      if(err) {next(err);return;}
+      if(results.rows[0] && (key === results.rows[0].password_reset_key)){
+        bcrypt.genSalt(10, function(err, salt){
+          bcrypt.hash(password, salt, null, function(err, hash){
+            var qString = "UPDATE users SET password=$1, password_reset_key=$2 WHERE email = $3";
+            db.query({text: qString, values: [hash, null, email]}, function(err, results){
+              if(err) {
+                next(err);
+                return;
+              }
+              else {
+                res.send({
+                  success: true,
+                  message: "Updated password for " + email
+                });
+              }
+            });
+          }
+        }
+      }
+    });
+  }
+  else {
+    var err = new Error("Didn't recieve required information");
+    err.status = 400;
+    next(err);
+  }
+});
 module.exports = router;
