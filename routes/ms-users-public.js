@@ -116,15 +116,18 @@ router.post('/send-reset-email', function(req, res, next){
   if (email) {
     var txtBody = "A password reset for your Molecular Playground account has been requested.\nPlease follow the link to reset your password: \n";
     var htmlBody = "<p>A password reset for your Molecular Playground account has been requested.</p><p>Please follow the link to reset your password: </p>"
+    // generate a password reset key
     var key = randomString(30);
     var link = MS_FRONTEND_URL + "/password-reset?email=" + email + "&key=" + key;
     var qString2 = 'UPDATE users SET password_reset_key=$1 WHERE email=$2';
+    // put the key in the database
     db.query({text: qString2, values: [key, email]}, function(err, success){
       if(err) {
         next(err);
         return;
       }
       else {
+        // prepare to send the email
         var reqParams = {
             url: MS_EMAIL_URL + '/general',
             method: 'PUT',
@@ -136,6 +139,7 @@ router.post('/send-reset-email', function(req, res, next){
               html: htmlBody + link
             }
         };
+        // send the email
         request(reqParams, function (error, response, body) {
           if(error) {next(error);return;}
           res.send({
@@ -157,13 +161,17 @@ router.post('/reset-password', function(req, res, next) {
   var email = req.body.email;
   var password = req.body.password;
   if (key && email && password) {
-    var query = "SELECT password_reset_key FROM users WHERE EMAIL=$1"
+    var query = "SELECT password_reset_key FROM users WHERE EMAIL=$1";
+    // put check that the keys are equal and change password if so
     db.query({text: query, values: [email]}, function(err, results){
       if(err) {next(err);return;}
+      // if they are...
       if(results.rows[0] && (key === results.rows[0].password_reset_key)){
+        // salt and hash the new password
         bcrypt.genSalt(10, function(err, salt){
           bcrypt.hash(password, salt, null, function(err, hash){
             var qString = "UPDATE users SET password=$1, password_reset_key=$2 WHERE email = $3";
+            // insert the new password in the database
             db.query({text: qString, values: [hash, null, email]}, function(err, results){
               if(err) {
                 next(err);
@@ -176,8 +184,14 @@ router.post('/reset-password', function(req, res, next) {
                 });
               }
             });
-          }
-        }
+          });
+        });
+      }
+      // if the keys weren't equal
+      else {
+        var err = new Error("Supplied password reset key didn't match expected key");
+        err.status = 403;
+        next(err);
       }
     });
   }
