@@ -3,8 +3,8 @@ var router = express.Router();
 var db = require('../lib/db.js');
 var bcrypt = require('bcrypt-nodejs');
 var request = require('request');
-var MS_EMAIL_URL = "http://msemail:3000";
-var MS_FRONTEND_URL = "http://104.236.54.250";
+var MS_EMAIL_URL = 'http://msemail:3000';
+var FRONTEND_URL = 'http://' + process.env.SERVER_URL;
 
 // get specific user
 router.get('/:username', function(req, res, next) {
@@ -44,7 +44,7 @@ router.put('/', function(req, res, next) {
 	            json: true,
 	            body: {
                 email: email,
-                link: MS_FRONTEND_URL + "/validate?email=" + email + "&key=" + validationURL
+                link: FRONTEND_URL + "/validate?email=" + email + "&key=" + validationURL
               }
           };
           request(reqParams, function (error, response, body) {
@@ -110,7 +110,7 @@ router.post('/send-reset-email', function(req, res, next){
     var htmlBody = "<p>A password reset for your Molecular Playground account has been requested.</p><p>Please follow the link to reset your password: </p>"
     // generate a password reset key
     var key = randomString(30);
-    var link = MS_FRONTEND_URL + "/password-reset?email=" + email + "&key=" + key;
+    var link = FRONTEND_URL + "/password-reset?email=" + email + "&key=" + key;
     var qString2 = 'UPDATE users SET password_reset_key=$1 WHERE email=$2';
     // put the key in the database
     db.query({text: qString2, values: [key, email]}, function(err, success){
